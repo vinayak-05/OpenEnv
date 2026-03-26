@@ -62,37 +62,36 @@ def llm_action(observation: Observation, model: str) -> Action:
     if not api_key:
         return heuristic_action(observation)
 
-    client = OpenAI(api_key=api_key)
-    payload: Dict[str, object] = {
-        "task_id": observation.task_id,
-        "instruction": observation.instruction,
-        "step_count": observation.step_count,
-        "max_steps": observation.max_steps,
-        "queue": [ticket.model_dump() for ticket in observation.queue],
-        "recent_events": observation.recent_events,
-    }
-
-    completion = client.chat.completions.create(
-        model=model,
-        temperature=0,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": (
-                    "Given the observation below, produce the next best action JSON with fields: "
-                    "action_type, ticket_id (if relevant), priority/team/label/message when needed.\n"
-                    f"Observation:\n{json.dumps(payload)}"
-                ),
-            },
-        ],
-        response_format={"type": "json_object"},
-    )
-
-    content = completion.choices[0].message.content or "{}"
-    parsed = json.loads(content)
-
     try:
+        client = OpenAI(api_key=api_key)
+        payload: Dict[str, object] = {
+            "task_id": observation.task_id,
+            "instruction": observation.instruction,
+            "step_count": observation.step_count,
+            "max_steps": observation.max_steps,
+            "queue": [ticket.model_dump() for ticket in observation.queue],
+            "recent_events": observation.recent_events,
+        }
+
+        completion = client.chat.completions.create(
+            model=model,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {
+                    "role": "user",
+                    "content": (
+                        "Given the observation below, produce the next best action JSON with fields: "
+                        "action_type, ticket_id (if relevant), priority/team/label/message when needed.\n"
+                        f"Observation:\n{json.dumps(payload)}"
+                    ),
+                },
+            ],
+            response_format={"type": "json_object"},
+        )
+
+        content = completion.choices[0].message.content or "{}"
+        parsed = json.loads(content)
         return Action(**parsed)
     except Exception:
         return heuristic_action(observation)
