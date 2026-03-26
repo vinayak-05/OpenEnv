@@ -5,7 +5,7 @@ import json
 from typing import Dict
 
 from app.environment import SupportTriageEnv
-from app.policy import llm_action
+from app.policy import heuristic_action, llm_action
 
 
 def run_baseline(model: str = "gpt-4o-mini", max_steps_override: int | None = None) -> Dict[str, float]:
@@ -19,7 +19,11 @@ def run_baseline(model: str = "gpt-4o-mini", max_steps_override: int | None = No
         max_steps = max_steps_override or observation.max_steps
 
         while not done and steps < max_steps:
-            action = llm_action(observation, model=model)
+            try:
+                action = llm_action(observation, model=model)
+            except Exception:
+                action = heuristic_action(observation)
+
             result = env.step(action)
             observation = result.observation
             done = result.done

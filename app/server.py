@@ -57,5 +57,14 @@ def grader() -> dict:
 
 @app.post("/baseline")
 def baseline(payload: BaselineRequest) -> dict:
-    scores = run_baseline(model=payload.model, max_steps_override=payload.max_steps)
-    return {"model": payload.model, "scores": scores}
+    try:
+        scores = run_baseline(model=payload.model, max_steps_override=payload.max_steps)
+        return {"model": payload.model, "scores": scores, "fallback_used": False}
+    except Exception as exc:
+        scores = run_baseline(model="gpt-4o-mini", max_steps_override=payload.max_steps)
+        return {
+            "model": payload.model,
+            "scores": scores,
+            "fallback_used": True,
+            "message": f"Baseline fallback used due to error: {type(exc).__name__}",
+        }
