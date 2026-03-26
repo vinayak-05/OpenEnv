@@ -9,20 +9,27 @@ pinned: false
 
 # Customer Support Triage OpenEnv
 
-I built this OpenEnv environment around a real support workflow: triaging incoming customer tickets.
+We built this OpenEnv environment around a real support workflow: triaging incoming customer tickets.
 
-The agent has to do the same things a support engineer does under pressure — set priority, route to the correct team, escalate incidents, and write safe customer replies. My goal was to keep this practical and operations-focused.
+The agent has to do the same things a support engineer does under pressure — set priority, route to the correct team, escalate incidents, and write safe customer replies. Our goal was to keep this practical and operations-focused.
+
+## Team
+
+This project was built by:
+
+- Vinayak
+- Rahul Soni
 
 ## Why this environment
 
-Support triage is one of the most common day-to-day tasks in SaaS teams. In this environment, I expect an agent to:
+Support triage is one of the most common day-to-day tasks in SaaS teams. In this environment, we expect an agent to:
 
 - identify urgent incidents quickly,
 - route tickets to the right teams,
 - avoid unsafe or premature resolution,
 - communicate clearly to customers.
 
-I tried to capture those constraints with deterministic graders and shaped rewards over the full episode.
+We tried to capture those constraints with deterministic graders and shaped rewards over the full episode.
 
 ## OpenEnv interface
 
@@ -138,7 +145,7 @@ python baseline.py --model gpt-4o-mini
 
 ## Hugging Face Spaces deployment
 
-I deployed this on a **Docker** Space. Add the `openenv` tag in Space settings.
+We deployed this on a **Docker** Space. Add the `openenv` tag in Space settings.
 
 Container starts on port `7860` and serves API from `app.server:app`.
 
