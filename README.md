@@ -142,6 +142,10 @@ Create a new **Docker** Space and push this repo. Ensure Space metadata includes
 
 Container starts on port `7860` and serves API from `app.server:app`.
 
+Live Space URL:
+
+- https://vinayak-1409-openenv-support-triage.hf.space
+
 ## Validation checklist
 
 Before submission:
@@ -159,3 +163,8 @@ Run locally and record output from `python baseline.py`:
 - medium: `0.55`
 - hard: `0.55`
 - average: `0.65`
+
+## Submission links
+
+- GitHub: https://github.com/vinayak-05/OpenEnv
+- Hugging Face Space: https://huggingface.co/spaces/Vinayak-1409/openenv-support-triage
