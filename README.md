@@ -1,3 +1,12 @@
+---
+title: OpenEnv Support Triage
+emoji: 🤖
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+pinned: false
+---
+
 # Customer Support Triage OpenEnv
 
 A real-world OpenEnv environment that simulates **customer support inbox triage** for SaaS operations teams.
