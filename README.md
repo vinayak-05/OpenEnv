@@ -9,24 +9,24 @@ pinned: false
 
 # Customer Support Triage OpenEnv
 
-A real-world OpenEnv environment that simulates **customer support inbox triage** for SaaS operations teams.
+I built this OpenEnv environment around a real support workflow: triaging incoming customer tickets.
 
-Agents must decide priority, routing, escalation, and customer-facing draft responses under realistic SLA pressure. This environment is designed to evaluate practical agent reliability, not game-playing.
+The agent has to do the same things a support engineer does under pressure — set priority, route to the correct team, escalate incidents, and write safe customer replies. My goal was to keep this practical and operations-focused.
 
 ## Why this environment
 
-Support triage is a core operational workflow in real companies. A capable agent should:
+Support triage is one of the most common day-to-day tasks in SaaS teams. In this environment, I expect an agent to:
 
 - identify urgent incidents quickly,
 - route tickets to the right teams,
-- avoid unsafe resolution behavior,
+- avoid unsafe or premature resolution,
 - communicate clearly to customers.
 
-This environment captures those constraints with deterministic task graders and trajectory-shaped rewards.
+I tried to capture those constraints with deterministic graders and shaped rewards over the full episode.
 
 ## OpenEnv interface
 
-The environment implements:
+The environment implements the standard OpenEnv API:
 
 - `reset(task_id)` → returns typed `Observation`
 - `step(action)` → returns typed `observation`, `reward`, `done`, `info`
@@ -42,7 +42,7 @@ Metadata is provided in `openenv.yaml`.
 
 ## Action space
 
-The action schema is validated by Pydantic (`Action`) and available from `/tasks`.
+The action schema is defined in Pydantic (`Action`) and also exposed through `/tasks`.
 
 `action_type` options:
 
@@ -56,7 +56,7 @@ The action schema is validated by Pydantic (`Action`) and available from `/tasks
 
 ## Observation space
 
-Each observation includes:
+Each observation contains:
 
 - task metadata (`task_id`, `task_name`, `instruction`)
 - episode progress (`step_count`, `max_steps`)
@@ -65,35 +65,35 @@ Each observation includes:
 
 ## Tasks (easy → medium → hard)
 
-1. **easy** — Single critical outage triage
-   - Objective: Prioritize outage, assign engineering, communicate safely.
-2. **medium** — Mixed queue (billing + security + feature request)
-   - Objective: Handle routing and severity tradeoffs across three ticket types.
+1. **easy** — one critical outage ticket in a small queue
+   - Goal: prioritize correctly, route to engineering, respond safely.
+2. **medium** — mixed queue (billing + security + feature request)
+   - Goal: make good routing/severity decisions across different ticket types.
 3. **hard** — SLA-critical multi-incident queue
-   - Objective: Balance outage/security urgency with refund + bug workflows while avoiding unsafe behavior.
+   - Goal: balance outage + security urgency while still handling refund/bug requests responsibly.
 
 All tasks have deterministic graders returning scores in `[0.0, 1.0]`.
 
 ## Reward design
 
-Reward is trajectory-aware and meaningful:
+Reward is shaped across the trajectory (not just final success/fail):
 
-- positive signal from grader score improvement (`progress_delta`)
-- small per-step cost to discourage inefficient policies
+- positive signal for score improvement (`progress_delta`)
+- small per-step cost to discourage wasteful behavior
 - penalties for invalid actions
-- penalties for repetitive loops
-- safety penalty for resolving tickets without customer communication
+- penalties for repeated loop-like actions
+- safety penalty for resolving tickets without drafting a customer response
 
-This gives dense feedback instead of sparse terminal-only scoring.
+This gives the agent useful feedback during an episode, not only at the end.
 
 ## API endpoints
 
 - `POST /reset` — reset task (`{"task_id":"easy|medium|hard"}`)
 - `POST /step` — apply one action
-- `GET /state` — full current environment state
-- `GET /tasks` — available tasks + action schema
-- `GET /grader` — current task grader score
-- `POST /baseline` — run baseline policy over all 3 tasks
+- `GET /state` — inspect current state
+- `GET /tasks` — list tasks + action schema
+- `GET /grader` — current grader score
+- `POST /baseline` — run baseline policy on all three tasks
 
 ## Local setup
 
@@ -111,7 +111,7 @@ docker build -t support-triage-openenv .
 docker run -p 7860:7860 support-triage-openenv
 ```
 
-### Docker API smoke test (curl)
+### Quick local API smoke test (curl)
 
 After the container is running:
 
@@ -125,10 +125,10 @@ curl -s -X POST http://localhost:7860/baseline -H "Content-Type: application/jso
 
 ## Baseline inference script
 
-`baseline.py` runs all three tasks and prints reproducible scores.
+`baseline.py` runs easy/medium/hard and prints reproducible scores.
 
 - Uses OpenAI Python client when `OPENAI_API_KEY` is set (`temperature=0`).
-- Falls back to deterministic heuristic policy when API key is absent.
+- Falls back to deterministic heuristic policy if the key is missing or API call fails.
 
 Run:
 
@@ -138,7 +138,7 @@ python baseline.py --model gpt-4o-mini
 
 ## Hugging Face Spaces deployment
 
-Create a new **Docker** Space and push this repo. Ensure Space metadata includes tag `openenv`.
+I deployed this on a **Docker** Space. Add the `openenv` tag in Space settings.
 
 Container starts on port `7860` and serves API from `app.server:app`.
 
@@ -148,7 +148,7 @@ Live Space URL:
 
 ## Validation checklist
 
-Before submission:
+Before submitting:
 
 1. `openenv validate` (if installed in your environment)
 2. `docker build` and `docker run` succeed
@@ -157,7 +157,7 @@ Before submission:
 
 ## Baseline reference scores
 
-Run locally and record output from `python baseline.py`:
+Current reference output (`python baseline.py`):
 
 - easy: `0.85`
 - medium: `0.55`
