@@ -1,0 +1,40 @@
+name: customer-support-triage-openenv
+version: 1.0.0
+description: >
+  Real-world customer support triage simulation for training and evaluating agentic systems.
+domain: customer-support
+entrypoint:
+  type: python
+  module: app.environment
+  class: SupportTriageEnv
+api:
+  framework: fastapi
+  app: app.server:app
+  endpoints:
+    reset: /reset
+    step: /step
+    state: /state
+    tasks: /tasks
+    grader: /grader
+    baseline: /baseline
+models:
+  observation: app.models.Observation
+  action: app.models.Action
+  reward: app.models.Reward
+tasks:
+  - id: easy
+    difficulty: easy
+    objective: Identify and triage a critical outage ticket safely.
+  - id: medium
+    difficulty: medium
+    objective: Handle mixed billing, security, and feature-request queue.
+  - id: hard
+    difficulty: hard
+    objective: Optimize triage under SLA pressure with multiple incidents.
+validation:
+  deterministic_graders: true
+  score_range: [0.0, 1.0]
+hf_space:
+  sdk: docker
+  tags:
+    - openenv
