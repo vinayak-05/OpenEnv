@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 
 from app.environment import SupportTriageEnv
 from app.models import Action, BaselineRequest, ResetRequest
@@ -16,9 +16,10 @@ def root() -> dict:
 
 
 @app.post("/reset")
-def reset(payload: ResetRequest) -> dict:
+def reset(payload: ResetRequest | None = Body(default=None)) -> dict:
     try:
-        observation = env.reset(task_id=payload.task_id)
+        task_id = payload.task_id if payload else None
+        observation = env.reset(task_id=task_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
