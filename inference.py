@@ -1,8 +1,12 @@
-from baseline import main
+from baseline import main as baseline_main
 
 
 def run() -> None:
-    main()
+    baseline_main()
+
+
+def main() -> None:
+    run()
 
 
 def main_entry() -> None:

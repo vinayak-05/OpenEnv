@@ -21,6 +21,7 @@ dependencies = [
 ]
 
 [project.scripts]
+server = "server.app:main"
 openenv-baseline = "baseline:main"
 openenv-inference = "inference:main"
 
@@ -28,4 +29,4 @@ openenv-inference = "inference:main"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "server*"]
