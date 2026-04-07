@@ -57,13 +57,21 @@ def heuristic_action(observation: Observation) -> Action:
     return Action(action_type="noop")
 
 
-def llm_action(observation: Observation, model: str) -> Action:
-    api_key = os.getenv("OPENAI_API_KEY")
+def llm_action(
+    observation: Observation,
+    model: str,
+    api_base_url: str | None = None,
+    api_key: str | None = None,
+) -> Action:
+    resolved_base_url = api_base_url or os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+    resolved_api_key = api_key or os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY")
+
+    api_key = resolved_api_key
     if not api_key:
         return heuristic_action(observation)
 
     try:
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(base_url=resolved_base_url, api_key=api_key)
         payload: Dict[str, object] = {
             "task_id": observation.task_id,
             "instruction": observation.instruction,
